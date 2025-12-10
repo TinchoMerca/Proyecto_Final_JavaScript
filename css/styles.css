@@ -92,6 +92,23 @@ button:hover {
     background-color: #2980b9; 
 }
 
+.card .btn-borrar {
+    background-color: #e74c3c; 
+    margin-top:5px;
+}
+
+.card .btn-borrar:hover {
+        background-color: #e92813; 
+}
+
+.pocostock {
+    border: 2px solid #e74c3c;
+    background-color: #fadbd8;
+}
+.pocostock h3 {
+    color: #c0392b;
+}
+
 /* Historial */
 ul { 
     list-style: none; 

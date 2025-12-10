@@ -1,10 +1,9 @@
-// --- 1. VARIABLES Y ESTADO DE LA APP ---
-// Intentamos leer del LocalStorage, si no hay nada, iniciamos con arrays vacíos.
+// --- 1. ESTADO Y VARIABLES ---
+// Inicialización desde LocalStorage o arrays vacíos
 let inventario = JSON.parse(localStorage.getItem("inventario")) || [];
 let ventas = JSON.parse(localStorage.getItem("ventas")) || [];
 
-// Referencias al DOM (HTML)
-// Capturamos los elementos que vamos a manipular o escuchar
+// Referencias al DOM
 const formulario = document.getElementById("product-form");
 const inputNombre = document.getElementById("product-name");
 const inputPrecio = document.getElementById("product-price");
@@ -16,135 +15,141 @@ const spanTotalStock = document.getElementById("total-stock");
 const spanDinero = document.getElementById("total-money");
 const btnBorrarHistorial = document.getElementById("btn-clear-history");
 
-// --- 2. CLASES Y CONSTRUCTORES ---
-// Usamos una clase para crear objetos "Producto" de forma ordenada
+// --- 2. CLASES ---
 class Producto {
     constructor(nombre, precio, stock) {
-        this.id = Date.now(); // Genera un ID único basado en el tiempo
-        this.nombre = nombre.toUpperCase(); // Guardamos el nombre en mayúsculas
+        this.id = Date.now();
+        this.nombre = nombre.toUpperCase();
         this.precio = parseFloat(precio);
         this.stock = parseInt(stock);
     }
 }
 
-// --- 3. FUNCIONES (Lógica) ---
+// --- 3. FUNCIONES ---
 
-// Función para guardar en LocalStorage (la llamamos cada vez que algo cambia)
+// Sincroniza los arrays con el almacenamiento del navegador
 function guardarEnStorage() {
     localStorage.setItem("inventario", JSON.stringify(inventario));
     localStorage.setItem("ventas", JSON.stringify(ventas));
 }
 
-// Función para dibujar (renderizar) los productos en pantalla
+// Renderiza las tarjetas de productos en el HTML
 function renderizarProductos() {
-    // 1. Limpiamos el contenedor para no duplicar
-    contenedorProductos.innerHTML = "";
+    contenedorProductos.innerHTML = ""; // Limpia contenedor para evitar duplicados
 
-    // 2. Recorremos el array de inventario
     inventario.forEach((producto) => {
-        // Creamos el HTML de la tarjeta
         const card = document.createElement("div");
         card.className = "card";
+
+        // Estilo condicional para stock bajo
+        if (producto.stock <= 3) {
+            card.classList.add("pocostock");
+        }
+            
         card.innerHTML = `
             <h3>${producto.nombre}</h3>
             <p>Precio: $${producto.precio}</p>
             <p>Stock: <strong>${producto.stock}</strong></p>
-            <button id="btn-${producto.id}" class="btn-vender">Vender</button>
+            <div class="card-actions">
+                <button id="btn-vender-${producto.id}" class="btn-vender">Vender</button>
+                <button id="btn-borrar-${producto.id}" class="btn-borrar">Eliminar</button>
+            </div>
         `;
-        
-        // Agregamos la tarjeta al contenedor
         contenedorProductos.appendChild(card);
 
-        // Agregamos el evento al botón de ESTA tarjeta específica
-        const botonVender = document.getElementById(`btn-${producto.id}`);
-        botonVender.addEventListener("click", () => {
-            venderProducto(producto.id);
-        });
+        // Asignación de eventos dinámicos
+        document.getElementById(`btn-vender-${producto.id}`).addEventListener("click", () => venderProducto(producto.id));
+        document.getElementById(`btn-borrar-${producto.id}`).addEventListener("click", () => eliminarProducto(producto.id));
     });
-
+    
     actualizarResumen();
 }
 
-// Función para dibujar el historial de ventas
+// Renderiza el historial de ventas
 function renderizarHistorial() {
     contenedorVentas.innerHTML = "";
-    
     ventas.forEach((venta) => {
         const li = document.createElement("li");
-        li.innerHTML = `
-            <span>${venta.producto}</span>
-            <span>+$${venta.precio}</span>
-        `;
+        li.innerHTML = `<span>${venta.producto}</span> <span>+$${venta.precio}</span>`;
         contenedorVentas.appendChild(li);
     });
 }
 
-// Función para actualizar los totales del header
+// Calcula y muestra los totales
 function actualizarResumen() {
-    // Usamos reduce para contar stock total
     const totalStock = inventario.reduce((acc, prod) => acc + prod.stock, 0);
-    // Usamos reduce para sumar el dinero ganado en ventas
     const totalDinero = ventas.reduce((acc, venta) => acc + venta.precio, 0);
 
     spanTotalStock.innerText = `Items en Stock: ${totalStock}`;
     spanDinero.innerText = `Dinero en Caja: $${totalDinero}`;
 }
 
-// Función Principal: Agregar Producto
+// Función Principal: Agregar o Actualizar Producto
 function agregarProducto(e) {
-    e.preventDefault(); // Evita que el formulario recargue la página
+    e.preventDefault();
 
     const nombre = inputNombre.value;
     const precio = inputPrecio.value;
     const stock = inputCantidad.value;
 
-    // Validación simple
+    // Validaciones
     if (nombre === "" || precio === "" || stock === "") {
-        alert("Por favor completa todos los campos"); // Ojo: idealmente usaríamos un div de error, pero alert es válido para validar inputs si no abusas.
+        alert("Por favor completa todos los campos");
+        return;
+    }
+    if (precio <= 0 || stock <= 0) {
+        alert("El precio y la cantidad deben ser mayores a cero.");
         return;
     }
 
-    // Creamos el objeto
-    const nuevoProducto = new Producto(nombre, precio, stock);
+    // Verificar existencia para evitar duplicados
+    const productoExistente = inventario.find(prod => prod.nombre === nombre.toUpperCase());
 
-    // Lo agregamos al array
-    inventario.push(nuevoProducto);
+    if (productoExistente) {
+        // Si existe, actualizamos stock y precio
+        productoExistente.stock += parseInt(stock);
+        productoExistente.precio = parseFloat(precio);
+    } else {
+        // Si no existe, creamos uno nuevo
+        const nuevoProducto = new Producto(nombre, precio, stock);
+        inventario.push(nuevoProducto);
+    }
 
-    // Guardamos y actualizamos pantalla
     guardarEnStorage();
     renderizarProductos();
-    
-    // Reseteamos el form
     formulario.reset();
 }
 
-// Función Principal: Vender Producto
+// Función Principal: Registrar Venta
 function venderProducto(id) {
-    // Buscamos el producto en el array
-    const productoEncontrado = inventario.find((prod) => prod.id === id);
+    const producto = inventario.find((prod) => prod.id === id);
 
-    if (productoEncontrado.stock > 0) {
-        // 1. Restamos stock
-        productoEncontrado.stock--;
+    if (producto.stock > 0) {
+        producto.stock--;
         
-        // 2. Registramos la venta
-        const registroVenta = {
+        ventas.push({
             id: Date.now(),
-            producto: productoEncontrado.nombre,
-            precio: productoEncontrado.precio
-        };
-        ventas.push(registroVenta);
+            producto: producto.nombre,
+            precio: producto.precio
+        });
 
-        // 3. Guardamos y redibujamos todo
         guardarEnStorage();
         renderizarProductos();
         renderizarHistorial();
     } else {
-        alert("¡No hay stock de este producto!"); // Feedback al usuario
+        alert("¡No hay stock de este producto!");
     }
 }
 
-// Función para borrar historial
+// Elimina producto definitivamente
+function eliminarProducto(id) {
+    if(confirm("¿Estás seguro de que quieres eliminar este producto?")) {
+        inventario = inventario.filter(prod => prod.id !== id);
+        guardarEnStorage();
+        renderizarProductos();
+    }
+}
+
 function borrarHistorial() {
     ventas = [];
     guardarEnStorage();
@@ -152,16 +157,11 @@ function borrarHistorial() {
     actualizarResumen();
 }
 
-// --- 4. EVENTOS (Interacción) ---
-
-// Escuchamos el envío del formulario
+// --- 4. EVENTOS E INICIALIZACIÓN ---
 formulario.addEventListener("submit", agregarProducto);
-
-// Escuchamos el botón de borrar historial
 btnBorrarHistorial.addEventListener("click", borrarHistorial);
 
-// --- 5. INICIALIZACIÓN ---
-// Al cargar la página, dibujamos lo que haya en memoria
+// Inicializar la app
 renderizarProductos();
 renderizarHistorial();
 actualizarResumen();
