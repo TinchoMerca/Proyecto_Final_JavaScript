@@ -120,3 +120,34 @@ li {
     display: flex; 
     justify-content: space-between; 
 }
+
+
+
+/* --- Sistema de Notificaciones (Toasts) --- */
+.notification-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.notification {
+    padding: 15px 20px;
+    border-radius: 5px;
+    color: white;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    min-width: 250px;
+    animation: slideIn 0.3s ease-out;
+}
+
+.notification.error { background-color: #e74c3c; }   /* Rojo para errores */
+.notification.success { background-color: #27ae60; } /* Verde para éxito */
+.notification.info { background-color: #3498db; }    /* Azul para info */
+
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
