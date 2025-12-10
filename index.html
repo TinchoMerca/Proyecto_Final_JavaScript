@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestor de Negocio 2.0</title>
+    <link rel="stylesheet" href="./css/styles.css">
+</head>
+<body>
+
+    <header>
+        <h1>Dashboard de Negocio</h1>
+        <nav>
+            <span id="total-stock">Items en Stock: 0</span> | 
+            <span id="total-money">Dinero en Caja: $0</span>
+        </nav>
+    </header>
+
+    <main class="container">
+        
+        <section id="admin-section">
+            <h2>1. Gestión de Stock (Alta de Productos)</h2>
+            <form id="product-form">
+                <input type="text" id="product-name" placeholder="Nombre del producto" required>
+                <input type="number" id="product-price" placeholder="Precio ($)" required>
+                <input type="number" id="product-quantity" placeholder="Cantidad Inicial" required>
+                <button type="submit">Agregar al Inventario</button>
+            </form>
+        </section>
+
+
+        <section id="shop-section">
+            <h2>2. Catálogo y Ventas</h2>
+            <div id="products-container" class="grid-layout">
+            </div>
+        </section>
+
+        
+        <section id="finance-section">
+            <h2>3. Registro de Ventas (Logs)</h2>
+            <button id="btn-clear-history">Borrar Historial</button>
+            <ul id="sales-log">
+            </ul>
+        </section>
+
+    </main>
+
+    <script src="js/main.js"></script>
+</body>
+</html>
