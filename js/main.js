@@ -1,4 +1,5 @@
 // --- 1. ESTADO Y VARIABLES ---
+
 let inventario = JSON.parse(localStorage.getItem("inventario")) || [];
 let ventas = JSON.parse(localStorage.getItem("ventas")) || [];
 
@@ -18,6 +19,7 @@ notificacionesDiv.className = "notification-container";
 document.body.appendChild(notificacionesDiv);
 
 // --- 2. CLASES ---
+
 class Producto {
     constructor(nombre, precio, stock) {
         this.id = Date.now();
@@ -34,7 +36,7 @@ function guardarEnStorage() {
     localStorage.setItem("ventas", JSON.stringify(ventas));
 }
 
-// Función para mostrar notificaciones personalizadas (Reemplaza al alert)
+// Función para mostrar notificaciones personalizadas
 function mostrarNotificacion(mensaje, tipo) {
     const notificacion = document.createElement("div");
     notificacion.className = `notification ${tipo}`;
@@ -144,8 +146,6 @@ function venderProducto(id) {
 
 function eliminarProducto(id) {
     // Usamos confirm porque es una acción destructiva importante
-    // (Nota: confirm es el único "alert" permitido por UX en casos críticos, 
-    // pero si quieres quitarlo también, simplemente borra el if y ejecuta directo)
     if(confirm("¿Seguro que deseas eliminar este producto?")) {
         inventario = inventario.filter(prod => prod.id !== id);
         guardarEnStorage();
@@ -167,6 +167,7 @@ function borrarHistorial() {
 }
 
 // --- 6. INICIALIZACIÓN ---
+
 formulario.addEventListener("submit", agregarProducto);
 btnBorrarHistorial.addEventListener("click", borrarHistorial);
 

@@ -69,44 +69,109 @@ button:hover {
 }
 
 /* Grid de productos */
+
 .grid-layout { 
     display: grid; 
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
-    gap: 15px; }
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); 
+    gap: 20px; 
+    padding: 10px;
+}
 
+/* Diseño de la Tarjeta */
 .card { 
-    border: 1px solid #eee; 
-    padding: 15px; 
-    border-radius: 8px; 
-    text-align: center; 
     background: #fff;
+    border-radius: 12px; 
+    padding: 20px; 
+    text-align: center; 
+    border: 1px solid #f0f0f0; 
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05); 
+    transition: transform 0.3s ease, box-shadow 0.3s ease; 
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.card:hover {
+    transform: translateY(-5px); 
+    box-shadow: 0 10px 20px rgba(0,0,0,0.12); 
+    border-color: transparent;
+}
+
+.card h3 {
+    font-size: 1.2rem;
+    color: #2c3e50;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.card p {
+    margin: 5px 0;
+    color: #7f8c8d;
+    font-size: 0.95rem;
+}
+
+.card p:nth-of-type(1) {
+    font-size: 1.3rem;
+    color: #27ae60;
+    font-weight: 700;
+    margin: 10px 0;
+}
+
+.card-actions {
+    display: flex;
+    gap: 10px; 
+    margin-top: 15px;
 }
 
 .card button { 
-    background-color: #3498db; 
-    width: 100%; 
-    margin-top: 10px; 
+    flex: 1;
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border-radius: 8px;
+    margin-top: 0; 
 }
 
-.card button:hover { 
+.btn-vender { 
+    background-color: #3498db; 
+    box-shadow: 0 2px 4px rgba(52, 152, 219, 0.3);
+}
+.btn-vender:hover { 
     background-color: #2980b9; 
 }
 
-.card .btn-borrar {
+.btn-borrar { 
     background-color: #e74c3c; 
-    margin-top:5px;
+    box-shadow: 0 2px 4px rgba(231, 76, 60, 0.3);
 }
-
-.card .btn-borrar:hover {
-        background-color: #e92813; 
+.btn-borrar:hover { 
+    background-color: #c0392b; 
 }
 
 .pocostock {
-    border: 2px solid #e74c3c;
-    background-color: #fadbd8;
+    border: 2px solid #e74c3c !important; 
+    background: #fff5f5; 
+    position: relative;
+    overflow: hidden;
 }
-.pocostock h3 {
-    color: #c0392b;
+
+.pocostock::before {
+    content: "!";
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #e74c3c;
+    color: white;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 0.8rem;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
 /* Historial */
@@ -120,8 +185,6 @@ li {
     display: flex; 
     justify-content: space-between; 
 }
-
-
 
 /* --- Sistema de Notificaciones (Toasts) --- */
 .notification-container {
@@ -143,9 +206,9 @@ li {
     animation: slideIn 0.3s ease-out;
 }
 
-.notification.error { background-color: #e74c3c; }   /* Rojo para errores */
-.notification.success { background-color: #27ae60; } /* Verde para éxito */
-.notification.info { background-color: #3498db; }    /* Azul para info */
+.notification.error { background-color: #e74c3c; }
+.notification.success { background-color: #27ae60; }
+.notification.info { background-color: #3498db; }
 
 @keyframes slideIn {
     from { transform: translateX(100%); opacity: 0; }
