@@ -1,37 +1,28 @@
-/* =========================================
-   1. CONFIGURACIÓN GENERAL Y FUENTES
-   ========================================= */
+/* Configuración General */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
 :root {
-    /* Paleta de Colores Moderna */
     --primary: #4e54c8;
     --primary-gradient: linear-gradient(135deg, #4e54c8, #8f94fb);
     --secondary: #ff7e5f;
     --secondary-gradient: linear-gradient(135deg, #ff7e5f, #feb47b);
-
     --success: #00b09b;
     --success-gradient: linear-gradient(135deg, #00b09b, #96c93d);
     --warning: #f1c40f;
     --warning-gradient: linear-gradient(135deg, #f1c40f, #f39c12);
     --danger: #ff416c;
     --danger-gradient: linear-gradient(135deg, #ff416c, #ff4b2b);
-
     --bg-body: #f4f7f6;
     --bg-card: #ffffff;
-
     --text-main: #2d3436;
     --text-light: #636e72;
     --border: #dfe6e9;
-
     --shadow-soft: 0 10px 20px rgba(0, 0, 0, 0.05);
     --shadow-hover: 0 15px 30px rgba(0, 0, 0, 0.1);
     --radius: 16px;
 }
 
-/* =========================================
-   SCROLLBAR PERSONALIZADO
-   ========================================= */
+/* Scrollbar */
 ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -64,9 +55,7 @@ body {
     overflow: hidden;
 }
 
-/* =========================================
-   2. HEADER
-   ========================================= */
+/* Header */
 header {
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(10px);
@@ -176,9 +165,7 @@ header {
     border-color: var(--primary);
 }
 
-/* =========================================
-   3. LAYOUT Y TARJETAS
-   ========================================= */
+/* Layout Principal */
 .container {
     display: grid;
     grid-template-columns: 3fr 1fr;
@@ -202,6 +189,7 @@ header {
     scrollbar-width: thin;
 }
 
+/* Tarjetas y Estadísticas */
 .stats-row {
     display: flex;
     gap: 20px;
@@ -288,9 +276,7 @@ header {
     font-weight: 500;
 }
 
-/* =========================================
-   4. CALENDARIO ESTILIZADO
-   ========================================= */
+/* Calendario */
 .calendar-section {
     background: var(--bg-card);
     border-radius: var(--radius);
@@ -420,6 +406,7 @@ header {
     border-radius: 10px;
 }
 
+/* Barras de Reserva */
 .booking-slot {
     height: 22px;
     margin-bottom: 3px;
@@ -454,7 +441,6 @@ header {
     font-weight: 500;
 }
 
-/* Iconos dentro de las barras (ADAPTADO) */
 .icon-in,
 .icon-out {
     font-size: 0.8em;
@@ -541,9 +527,7 @@ header {
     border-radius: 0 6px 6px 0;
 }
 
-/* =========================================
-   5. PANEL DERECHO Y NOTAS
-   ========================================= */
+/* Panel Derecho y Notas */
 .side-panel {
     display: flex;
     flex-direction: column;
@@ -633,15 +617,6 @@ textarea {
     background: #b2bec3;
 }
 
-.list-section h3 {
-    font-size: 1.1rem;
-    margin-bottom: 15px;
-    color: var(--text-main);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
 .booking-list-item {
     background: white;
     padding: 15px;
@@ -661,9 +636,7 @@ textarea {
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
 }
 
-/* =========================================
-   6. MODAL
-   ========================================= */
+/* Modales */
 .modal {
     display: none;
     position: fixed;
@@ -812,7 +785,6 @@ select:focus {
     border-top: 1px solid var(--border);
 }
 
-/* ESTILOS DE BOTONES DEFAULT (DESKTOP) */
 .btn {
     border: none;
     padding: 12px 25px;
@@ -850,9 +822,7 @@ select:focus {
     color: #d63031;
 }
 
-/* =========================================
-   7. RESPONSIVE MOBILE (CORREGIDO)
-   ========================================= */
+/* Responsive */
 @media (max-width: 768px) {
 
     html,
@@ -881,7 +851,6 @@ select:focus {
         max-height: none !important;
     }
 
-    /* HEADER MOBILE */
     header {
         display: flex;
         flex-wrap: wrap;
@@ -892,7 +861,6 @@ select:focus {
         height: auto;
         box-shadow: none;
         border-bottom: 1px solid #eee;
-        position: relative;
     }
 
     .brand {
@@ -938,7 +906,6 @@ select:focus {
         background-color: #f5f5f5;
     }
 
-    /* FLAT DESIGN MOBILE */
     .stat-card,
     .calendar-section,
     .notes-section,
@@ -947,7 +914,6 @@ select:focus {
         border: 1px solid #eee;
     }
 
-    /* MODAL MOBILE (Pantalla Blanca) */
     .modal {
         background-color: #ffffff;
         z-index: 9999;
@@ -973,9 +939,6 @@ select:focus {
         height: 40px;
     }
 
-    /* --------------------------------------------------------
-       BOTONES DEL MODAL EN MÓVIL
-     -------------------------------------------------------- */
     .modal-footer {
         display: flex;
         flex-direction: column;
@@ -1011,27 +974,15 @@ select:focus {
         height: 55px !important;
         font-size: 1rem;
         border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
     }
 
     .calendar-section {
         overflow-x: auto;
-        border-radius: 12px;
     }
 
     .weekdays,
     .days {
         min-width: 600px;
-    }
-
-    .booking-bar,
-    .booking-list-item div {
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        max-width: 100%;
     }
 
     .form-row {
@@ -1042,43 +993,14 @@ select:focus {
     .form-body {
         padding: 15px;
     }
-}
 
-/* =========================================
-   8. AJUSTE DE ALERTAS (SWEETALERT) EN MÓVIL
-   ========================================= */
-@media (max-width: 768px) {
     div:where(.swal2-container) div:where(.swal2-popup) {
         padding: 10px !important;
         width: 90% !important;
         max-width: 350px !important;
     }
-
-    div:where(.swal2-container) .swal2-title {
-        font-size: 1.2rem !important;
-        padding: 10px 0 !important;
-    }
-
-    div:where(.swal2-container) .swal2-input {
-        height: 35px !important;
-        padding: 0 10px !important;
-        margin: 5px auto !important;
-        font-size: 0.9rem !important;
-    }
-
-    div:where(.swal2-container) .swal2-actions {
-        margin-top: 10px !important;
-    }
-
-    div:where(.swal2-container) .swal2-styled {
-        padding: 8px 20px !important;
-        font-size: 0.9rem !important;
-    }
 }
 
-/* =========================================
-    ARREGLO DE ALERTAS (SWEETALERT) ENCIMA DEL MODAL
-   ========================================= */
 div:where(.swal2-container) {
     z-index: 10000 !important;
 }

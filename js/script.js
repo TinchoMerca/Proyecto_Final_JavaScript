@@ -1,20 +1,20 @@
-// ==========================================
-// 1. VARIABLES GLOBALES Y CLASES
-// ==========================================
+/* Gestión de Cabañas - Lógica principal
+*/
+
+// Variables de estado
 let currentDate = new Date();
-// CAMBIO: Inicializamos vacío, la carga se hace en loadInitialData()
 let bookings = [];
 let editingBookingId = null;
 
-// Referencias al DOM (Elementos HTML)
+// Elementos del DOM
 const monthYear = document.getElementById('monthYear');
 const daysContainer = document.getElementById('daysContainer');
 const cabinFilter = document.getElementById('cabinFilter');
 
-// Clase Constructora para las Reservas (Cumple Unidad 5)
+// Clase principal de Reserva
 class Booking {
     constructor(guest, phone, cabin, start, end, price, status, total) {
-        this.id = Date.now(); // ID único basado en tiempo
+        this.id = Date.now();
         this.guest = guest;
         this.phone = phone;
         this.cabin = cabin;
@@ -26,7 +26,7 @@ class Booking {
     }
 }
 
-// Configuración de alertas (Toast)
+// Configuración de notificaciones
 const Toast = Swal.mixin({
     toast: true,
     position: 'top-end',
@@ -39,61 +39,57 @@ const Toast = Swal.mixin({
     }
 });
 
-// ==========================================
-// 2. INICIALIZACIÓN (ASÍNCRONA)
-// ==========================================
-// CAMBIO: Agregamos async para esperar la carga de datos
+// Inicialización
 document.addEventListener('DOMContentLoaded', async () => {
-    await loadInitialData(); // Esperamos a que se resuelva el fetch o el localStorage
+    await loadInitialData();
     renderCalendar();
     loadNotes();
     renderBookingList();
-    updateGuestHistory(); // Carga nombres previos para autocompletar
+    updateGuestHistory();
 });
 
-// --- NUEVA FUNCIÓN PARA CARGA ASÍNCRONA (Cumple Unidad 9) ---
+// Carga de datos (Local o JSON)
 async function loadInitialData() {
     const storedData = localStorage.getItem('cabanas_reservas');
 
-    if (storedData) {
-        // Opción A: Ya existen datos persistentes, los usamos (Unidad 5)
+    // Si hay datos guardados y no están vacíos, los usamos
+    if (storedData && JSON.parse(storedData).length > 0) {
         bookings = JSON.parse(storedData);
     } else {
-        // Opción B: No hay datos, simulamos petición a API externa (Unidad 9)
+        // Si no, traemos el dataset inicial
         try {
-            const response = await fetch('../data.json'); // Asegúrate de crear este archivo
+            const response = await fetch('./data.json');
+
+            if (!response.ok) throw new Error('Error al cargar datos iniciales');
+
             const data = await response.json();
 
-            // Asignamos los datos del JSON al array global
-            // Generamos IDs únicos frescos para evitar conflictos
+            // Generamos IDs frescos y asignamos
             bookings = data.map(b => ({
                 ...b,
-                id: Date.now() + Math.floor(Math.random() * 1000)
+                id: Date.now() + Math.floor(Math.random() * 10000)
             }));
 
-            // Guardamos esto en local para la próxima visita
             localStorage.setItem('cabanas_reservas', JSON.stringify(bookings));
 
-            // Notificamos al usuario
             Toast.fire({
                 icon: 'info',
-                title: 'Datos de ejemplo cargados'
+                title: 'Datos iniciales cargados'
             });
 
         } catch (error) {
-            console.error("Error cargando JSON o archivo no encontrado:", error);
-            bookings = []; // Si falla, iniciamos vacío para no romper la app
+            console.error(error);
+            bookings = [];
         }
     }
 }
 
-// ==========================================
-// 3. LÓGICA DEL CALENDARIO
-// ==========================================
+/* --- CALENDARIO --- */
+
 function renderCalendar() {
     const filter = cabinFilter.value;
 
-    // Configurar fechas
+    // Configuración de fecha
     currentDate.setDate(1);
     const month = currentDate.getMonth();
     const year = currentDate.getFullYear();
@@ -105,14 +101,14 @@ function renderCalendar() {
 
     let daysHTML = "";
 
-    // Días vacíos del mes anterior
+    // Espacios vacíos mes anterior
     for (let i = 0; i < firstDayIndex; i++) {
         daysHTML += `<div class="day empty"></div>`;
     }
 
     const allCabins = ["Cabaña 1", "Cabaña 2", "Cabaña 3", "Cabaña 4", "Cabaña 5"];
 
-    // Bucle para dibujar los días
+    // Renderizado de días
     for (let i = 1; i <= lastDay; i++) {
         const dateObj = new Date(year, month, i);
         const dateStr = formatDate(dateObj);
@@ -122,11 +118,12 @@ function renderCalendar() {
         const cabinsToShow = (filter === 'all') ? allCabins : [filter];
 
         cabinsToShow.forEach(cabinName => {
+            // Buscamos reservas relevantes para este día
             const endingBooking = bookings.find(b => b.cabin === cabinName && b.end === dateStr);
             const startingBooking = bookings.find(b => b.cabin === cabinName && b.start === dateStr);
             const ongoingBooking = bookings.find(b => b.cabin === cabinName && b.start < dateStr && b.end > dateStr);
 
-            // --- CASO A: RECAMBIO (Barra dividida) ---
+            // Recambio: Uno sale y otro entra
             if (endingBooking && startingBooking) {
                 slotsHTML += `
                 <div class="booking-slot">
@@ -144,7 +141,7 @@ function renderCalendar() {
                     </div>
                 </div>`;
             }
-            // --- CASO B: NORMAL ---
+            // Reserva normal (barra completa o inicio/fin)
             else {
                 const booking = endingBooking || startingBooking || ongoingBooking;
 
@@ -191,9 +188,7 @@ function changeMonth(direction) {
     renderCalendar();
 }
 
-// ==========================================
-// 4. GESTIÓN DE RESERVAS (CRUD)
-// ==========================================
+/* --- CRUD RESERVAS --- */
 
 function saveBooking() {
     const guest = document.getElementById('guestName').value;
@@ -204,22 +199,22 @@ function saveBooking() {
     const price = parseFloat(document.getElementById('pricePerNight').value) || 0;
     const status = document.getElementById('paymentStatus').value;
 
-    // Validaciones
     if (!guest || !start || !end) {
         Swal.fire({ icon: 'warning', title: 'Faltan datos', confirmButtonColor: '#4a69bd' });
         return;
     }
     if (start > end) {
-        Swal.fire({ icon: 'error', title: 'Fechas inválidas', text: 'La salida no puede ser antes de la entrada.', confirmButtonColor: '#eb3b5a' });
+        Swal.fire({ icon: 'error', title: 'Fechas incorrectas', text: 'Revisar entrada y salida.', confirmButtonColor: '#eb3b5a' });
         return;
     }
 
+    // Verificar disponibilidad
     const conflict = checkOverlap(cabin, start, end, editingBookingId);
     if (conflict) {
         Swal.fire({
             icon: 'error',
-            title: '¡Superposición!',
-            html: `La <b>${cabin}</b> ya está ocupada por <b>${conflict.guest}</b>.<br>Fechas: ${conflict.start} al ${conflict.end}`,
+            title: 'No disponible',
+            html: `La <b>${cabin}</b> está ocupada por <b>${conflict.guest}</b> en esas fechas.`,
             confirmButtonColor: '#eb3b5a'
         });
         return;
@@ -228,7 +223,6 @@ function saveBooking() {
     const nights = calculateNights(start, end);
     const total = nights * price;
 
-    // Crear o Actualizar Reserva
     if (editingBookingId) {
         const index = bookings.findIndex(b => b.id === editingBookingId);
         const b = bookings[index];
@@ -241,7 +235,6 @@ function saveBooking() {
         b.status = status;
         b.totalPrice = total;
     } else {
-        // Usamos la Clase Booking (Unidad 5)
         const newBooking = new Booking(guest, phone, cabin, start, end, price, status, total);
         bookings.push(newBooking);
     }
@@ -251,7 +244,7 @@ function saveBooking() {
     renderCalendar();
     updateGuestHistory();
 
-    Toast.fire({ icon: 'success', title: editingBookingId ? 'Reserva actualizada' : 'Reserva creada' });
+    Toast.fire({ icon: 'success', title: 'Guardado correctamente' });
 }
 
 function checkOverlap(cabin, start, end, ignoreId = null) {
@@ -274,7 +267,6 @@ function editBooking(id, event) {
     editingBookingId = id;
     document.getElementById('modalTitle').innerText = "Editar Reserva";
 
-    // Llenar formulario
     document.getElementById('guestName').value = booking.guest;
     document.getElementById('guestPhone').value = booking.phone;
     document.getElementById('cabinName').value = booking.cabin;
@@ -293,12 +285,11 @@ function deleteFromModal() {
     if (!editingBookingId) return;
 
     Swal.fire({
-        title: '¿Eliminar?',
-        text: "No podrás revertir esto.",
+        title: '¿Eliminar reserva?',
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#eb3b5a',
-        confirmButtonText: 'Sí, borrar'
+        confirmButtonText: 'Sí, eliminar'
     }).then((result) => {
         if (result.isConfirmed) {
             bookings = bookings.filter(b => b.id !== editingBookingId);
@@ -310,39 +301,28 @@ function deleteFromModal() {
     });
 }
 
-// ==========================================
-// 5. ESTADÍSTICAS Y REPORTES
-// ==========================================
+/* --- ESTADÍSTICAS Y PDF --- */
 
-// Cálculo de estadísticas con REDUCE (Unidad 6)
 function calculateMonthlyStats() {
     const month = currentDate.getMonth();
     const year = currentDate.getFullYear();
 
-    // Definimos los límites del mes actual
     const monthStart = new Date(year, month, 1);
     const monthEnd = new Date(year, month + 1, 0);
 
-    // Filtramos las reservas de este mes
     const monthBookings = bookings.filter(b => {
         const bStart = new Date(b.start);
         const bEnd = new Date(b.end);
         return bStart <= monthEnd && bEnd >= monthStart;
     });
 
-    // 1. Calculamos el Dinero (Igual que antes)
     const totalRevenue = monthBookings.reduce((acc, booking) => {
         return acc + (parseFloat(booking.totalPrice) || 0);
     }, 0);
 
-    // 2. [CAMBIO] Ahora contamos CANTIDAD DE RESERVAS
-    // Simplemente usamos .length para saber cuántas hay
     const totalReservas = monthBookings.length;
 
-    // Actualizamos el HTML
     document.getElementById('monthRevenue').innerText = `$${totalRevenue.toLocaleString()}`;
-
-    // Mostramos "X Reservas" en lugar de noches
     document.getElementById('monthOccupancy').innerText = totalReservas;
 }
 
@@ -361,13 +341,13 @@ function exportToPDF() {
     });
 
     if (monthlyBookings.length === 0) {
-        Swal.fire({ icon: 'info', title: 'Sin datos', text: 'No hay reservas visibles.' });
+        Swal.fire({ icon: 'info', title: 'Sin datos para exportar' });
         return;
     }
 
     const doc = new jsPDF();
     doc.setFontSize(18);
-    doc.text("Reporte - Mis Cabañas", 14, 20);
+    doc.text("Reporte Mensual", 14, 20);
     doc.setFontSize(12);
     doc.setTextColor(100);
     doc.text(`Período: ${monthName}`, 14, 28);
@@ -401,15 +381,13 @@ function exportToPDF() {
     const finalY = doc.lastAutoTable.finalY + 10;
     doc.setFontSize(12);
     doc.setTextColor(0);
-    doc.text(`Ingresos Totales: $${totalMoney.toLocaleString()}`, 14, finalY);
+    doc.text(`Total: $${totalMoney.toLocaleString()}`, 14, finalY);
 
     doc.save(`Reporte_${monthName.replace(' ', '_')}.pdf`);
-    Toast.fire({ icon: 'success', title: 'PDF descargado' });
+    Toast.fire({ icon: 'success', title: 'Descargando PDF...' });
 }
 
-// ==========================================
-// 6. UTILIDADES Y HELPERS
-// ==========================================
+/* --- HELPERS Y UI --- */
 
 function renderBookingList() {
     const listDiv = document.getElementById('bookingList');
@@ -431,7 +409,7 @@ function renderBookingList() {
                     <button class="btn" onclick="editBooking(${b.id})"><i class="fas fa-pencil-alt" style="color:#aaa"></i></button>
                  </div>`;
     });
-    listDiv.innerHTML = html || "<p style='color:#ccc; text-align:center'>Nada por aquí...</p>";
+    listDiv.innerHTML = html || "<p style='color:#ccc; text-align:center'>No hay reservas próximas.</p>";
 }
 
 function searchBooking() {
@@ -451,7 +429,7 @@ function searchBooking() {
                     <button class="btn" onclick="editBooking(${b.id})"><i class="fas fa-edit"></i></button>
                  </div>`;
     });
-    listDiv.innerHTML = html || "<p>No encontrado.</p>";
+    listDiv.innerHTML = html || "<p>Sin resultados.</p>";
 }
 
 function updateGuestHistory() {
@@ -471,9 +449,9 @@ function downloadBackup() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `backup_cabanas_${formatDate(new Date())}.json`;
+    a.download = `backup_${formatDate(new Date())}.json`;
     a.click();
-    Toast.fire({ icon: 'info', title: 'Copia descargada' });
+    Toast.fire({ icon: 'info', title: 'Backup descargado' });
 }
 
 function restoreBackup(input) {
@@ -491,18 +469,18 @@ function restoreBackup(input) {
 
             Swal.fire({
                 icon: 'success',
-                title: 'Restaurado',
+                title: 'Restauración completada',
                 confirmButtonColor: '#20bf6b'
             }).then(() => location.reload());
 
         } catch (x) {
-            Swal.fire({ icon: 'error', title: 'Error', text: 'Archivo inválido.' });
+            Swal.fire({ icon: 'error', title: 'Error', text: 'El archivo no es válido.' });
         }
     };
     reader.readAsText(file);
 }
 
-// --- MODAL Y FORMULARIOS ---
+/* --- MODAL --- */
 
 function openModal() {
     editingBookingId = null;
@@ -548,8 +526,7 @@ document.getElementById('notesArea').addEventListener('input', (e) => {
     localStorage.setItem('cabanas_notas', e.target.value);
 });
 
-// --- FUNCIONES PURAS DE AYUDA ---
-
+// Utils
 function isDateInProgress(current, start, end) {
     return current >= start && current <= end;
 }

@@ -5,9 +5,9 @@
         "cabin": "Cabaña 1",
         "start": "2026-01-15",
         "end": "2026-01-20",
-        "pricePerNight": 100,
+        "pricePerNight": 40000,
         "status": "paid",
-        "totalPrice": 500
+        "totalPrice": 200000
     },
     {
         "guest": "Maria Gomez (Demo)",
@@ -15,8 +15,8 @@
         "cabin": "Cabaña 2",
         "start": "2026-01-18",
         "end": "2026-01-22",
-        "pricePerNight": 120,
+        "pricePerNight": 50000,
         "status": "pending",
-        "totalPrice": 480
+        "totalPrice": 200000
     }
 ]
