@@ -2,7 +2,8 @@
 // 1. VARIABLES GLOBALES Y CLASES
 // ==========================================
 let currentDate = new Date();
-let bookings = JSON.parse(localStorage.getItem('cabanas_reservas')) || [];
+// CAMBIO: Inicializamos vacío, la carga se hace en loadInitialData()
+let bookings = [];
 let editingBookingId = null;
 
 // Referencias al DOM (Elementos HTML)
@@ -39,14 +40,52 @@ const Toast = Swal.mixin({
 });
 
 // ==========================================
-// 2. INICIALIZACIÓN
+// 2. INICIALIZACIÓN (ASÍNCRONA)
 // ==========================================
-document.addEventListener('DOMContentLoaded', () => {
+// CAMBIO: Agregamos async para esperar la carga de datos
+document.addEventListener('DOMContentLoaded', async () => {
+    await loadInitialData(); // Esperamos a que se resuelva el fetch o el localStorage
     renderCalendar();
     loadNotes();
     renderBookingList();
     updateGuestHistory(); // Carga nombres previos para autocompletar
 });
+
+// --- NUEVA FUNCIÓN PARA CARGA ASÍNCRONA (Cumple Unidad 9) ---
+async function loadInitialData() {
+    const storedData = localStorage.getItem('cabanas_reservas');
+
+    if (storedData) {
+        // Opción A: Ya existen datos persistentes, los usamos (Unidad 5)
+        bookings = JSON.parse(storedData);
+    } else {
+        // Opción B: No hay datos, simulamos petición a API externa (Unidad 9)
+        try {
+            const response = await fetch('../data.json'); // Asegúrate de crear este archivo
+            const data = await response.json();
+
+            // Asignamos los datos del JSON al array global
+            // Generamos IDs únicos frescos para evitar conflictos
+            bookings = data.map(b => ({
+                ...b,
+                id: Date.now() + Math.floor(Math.random() * 1000)
+            }));
+
+            // Guardamos esto en local para la próxima visita
+            localStorage.setItem('cabanas_reservas', JSON.stringify(bookings));
+
+            // Notificamos al usuario
+            Toast.fire({
+                icon: 'info',
+                title: 'Datos de ejemplo cargados'
+            });
+
+        } catch (error) {
+            console.error("Error cargando JSON o archivo no encontrado:", error);
+            bookings = []; // Si falla, iniciamos vacío para no romper la app
+        }
+    }
+}
 
 // ==========================================
 // 3. LÓGICA DEL CALENDARIO
@@ -276,10 +315,10 @@ function deleteFromModal() {
 // ==========================================
 
 // Cálculo de estadísticas con REDUCE (Unidad 6)
-function calculateMonthlyStats() { 
-    const month = currentDate.getMonth(); 
-    const year = currentDate.getFullYear(); 
-    
+function calculateMonthlyStats() {
+    const month = currentDate.getMonth();
+    const year = currentDate.getFullYear();
+
     // Definimos los límites del mes actual
     const monthStart = new Date(year, month, 1);
     const monthEnd = new Date(year, month + 1, 0);
@@ -299,12 +338,12 @@ function calculateMonthlyStats() {
     // 2. [CAMBIO] Ahora contamos CANTIDAD DE RESERVAS
     // Simplemente usamos .length para saber cuántas hay
     const totalReservas = monthBookings.length;
-    
+
     // Actualizamos el HTML
-    document.getElementById('monthRevenue').innerText = `$${totalRevenue.toLocaleString()}`; 
-    
+    document.getElementById('monthRevenue').innerText = `$${totalRevenue.toLocaleString()}`;
+
     // Mostramos "X Reservas" en lugar de noches
-    document.getElementById('monthOccupancy').innerText = totalReservas; 
+    document.getElementById('monthOccupancy').innerText = totalReservas;
 }
 
 function exportToPDF() {
